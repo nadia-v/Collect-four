@@ -1,25 +1,22 @@
 package application;
 	
 import javafx.application.Application;
-import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Label;
+import javafx.geometry.VPos;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.CacheHint;
-import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -27,7 +24,53 @@ import javafx.scene.text.Text;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
-public class ConnectFour extends Application {	
+public class ConnectFour extends Application {
+	//This program is a customized version of Connect Four game
+	//After program is ran, users will be presented with the player selection window
+	//There are 15 characters for users to choose from
+	//Player one chooses first, then player 2 chooses
+	//After both players have chosen, 'play' button is activated and needs to be pressed for the game to begin
+	//Until play button is pressed, players have an opportunity to choose different characters 
+	//After play button is pressed, players will be presented with new window --> game window
+	//In the game window, switching turns, players have to move their avatar above the column they wish to drop it into
+	//Once avatar is above the desired column, player has to click on the avatar to complete the move
+	//The goal of the game is collecting 4 same characters in a row
+	//Characters can be collected in horizontal, vertical or diagonal rows
+	//After one of the players wins, his avatar will be displayed enlarged and the program will offer to play again
+	//If the game is a tie, no avatars will be displayed, just an option to play again.
+	//In case players wish to look at the part of the board blocked by the enlarged avatar,
+	//The avatar can be moved around with the mouse
+	
+	
+	// Import avatar images
+	
+	String louise2URL = "/application/images/louise2.gif";
+	Image louise2 = new Image(louise2URL, 100, 100, true, true);
+	ImageView louise2View = new ImageView(louise2);
+	
+	String tina2URL = "/application/images/tina2.gif";
+	Image tina2 = new Image(tina2URL, 100, 100, true, true);
+	ImageView tina2View = new ImageView(tina2);
+	
+	String geneURL = "/application/images/gene.gif";
+	Image gene = new Image(geneURL, 100, 100, true, true);
+	ImageView geneView = new ImageView(gene);
+	
+	String bob2URL = "/application/images/bob2.gif";
+	Image bob2 = new Image(bob2URL, 100, 100, true, true);
+	ImageView bob2View = new ImageView(bob2);
+	
+	String linda2URL = "/application/images/linda2.gif";
+	Image linda2 = new Image(linda2URL, 100, 100, true, true);
+	ImageView linda2View = new ImageView(linda2);
+	
+	String rickURL = "/application/images/rick.gif";
+	Image rick = new Image(rickURL, 100, 100, true, true);
+	ImageView rickView = new ImageView(rick);
+	
+	String mortieURL = "/application/images/mortie.gif";
+	Image mortie = new Image(mortieURL, 100, 100, true, true);
+	ImageView mortieView = new ImageView(mortie);
 	
 	String unicornURL = "/application/images/unicorn.gif";
 	Image unicorn = new Image(unicornURL, 100, 100, true, true);
@@ -45,11 +88,30 @@ public class ConnectFour extends Application {
 	Image raccoon = new Image(raccoonURL, 100, 100, true, true);
 	ImageView raccoonView = new ImageView(raccoon);
 	
-	String helloKittyURL = "https://cdn.clipart.email/2e54ac74b25cf5d04fdb106c1be52c71_glitter-graphics-cute-" +
-			"graphics-free-graphics-free-clipart-png-_386-500.gif";
+	String helloKittyURL = "/application/images/helloKitty.gif";
 	Image helloKitty = new Image(helloKittyURL, 100, 100, true, true);
 	ImageView helloKittyView = new ImageView(helloKitty);
 		
+	String pandaURL = "/application/images/panda.gif";
+	Image panda = new Image(pandaURL, 100, 100, true, true);
+	ImageView pandaView = new ImageView(panda);
+	
+	String catURL = "/application/images/cat.gif";
+	Image cat = new Image(catURL, 100, 100, true, true);
+	ImageView catView = new ImageView(cat);
+	
+	String minionURL = "/application/images/minion.gif";
+	Image minion = new Image(minionURL, 100, 100, true, true);
+	ImageView minionView = new ImageView(minion);
+	
+	ImageView avatar = new ImageView(new Image("/application/images/ninja.png", 100, 100, true, true));
+	
+	
+
+
+	boolean winner = false;
+	Button play = new Button("PLAY");
+	
 	
 	private Text playerSelectionText  = new Text("Player 1 choose your avatar!");
 	private Text bannerText = new Text("Player 1 make your move!");
@@ -60,32 +122,51 @@ public class ConnectFour extends Application {
 	
 	private Cell[][] cell = new Cell[7][6];
 	
-	ImageView avatar = new ImageView(new Image("/application/images/ninja.png", 100, 100, true, true));
 	
 	GridPane pane = new GridPane();
+	VBox playersMove = new VBox();
+	Pane move = new Pane();
+	
+	Stage stage = new Stage();
+	Stage newWindow = new Stage();
+	
+	
+	
+//---------------------------------------------------------------//
+
+
+	public void restart(Stage stage) {
+	    startGame(stage);
+	}
 
 	@Override
 	public void start(Stage primaryStage) {
+	    startGame(primaryStage);
+	}
+		
+//---------------------------------------------------------------//	
+	
+	public void startGame(Stage stage) {
 				
 		
 		//----------------------Player Instructions Pane---------------------------------//
 		
-		StackPane selectPlayer = new StackPane();
 		
+		StackPane selectPlayerBanner = new StackPane();
 		Rectangle playerSelectionRectangle = new Rectangle(0, 0, 700, 100);
 		playerSelectionRectangle.setFill(Color.RED);
 		playerSelectionRectangle.setStroke(Color.BLACK);
 		playerSelectionText.setFont(Font.font("Andale Mono", FontWeight.BOLD, 25));
 		
-		selectPlayer.getChildren().addAll(playerSelectionRectangle, playerSelectionText);
+		selectPlayerBanner.getChildren().addAll(playerSelectionRectangle, playerSelectionText);
 		
 		
 		//----------------------Player Selection Pane---------------------------------//
 		
-		GridPane players = new GridPane();
+		GridPane players = new GridPane();	// All available avatars
 		players.setStyle("-fx-background-color: red;");
-		players.setPadding(new Insets(10, 10, 10, 10));
-		players.setVgap(10);
+		players.setPadding(new Insets(10, 10, 10, 100));
+		players.setVgap(30);
 		players.setHgap(10);
 		
 		Text player1Text = new Text("Player 1");
@@ -98,44 +179,130 @@ public class ConnectFour extends Application {
 		ImageView player1 = new ImageView(image);
 		ImageView player2 = new ImageView(image);
 		
+		play.setDisable(true);
+		play.setPrefSize(100, 70);
 		
-		
-		Button play = new Button("PLAY");
-		play.setOnAction(new EventHandler<ActionEvent>() {
-			
-			
-//--------------------------------------------------------------------------------------------------------//
-//--------------------------------------------------------------------------------------------------------//
-//--------------------------------------------------------------------------------------------------------//
-			
-			
-		//----------------------Game---------------------------------//
-            @Override
-            public void handle(ActionEvent event) {
-            	primaryStage.close();
-            	
-            	Game game = new Game();
-            	game.nextMove();
-            }
-		});
-		
-//--------------------------------------------------------------------------------------------------------//
-//--------------------------------------------------------------------------------------------------------//
-//--------------------------------------------------------------------------------------------------------//
 		
 		players.add(player1Text, 0, 0);
 		players.add(player2Text, 0, 1);
 		players.add(player1, 1, 0);
 		players.add(player2, 1, 1);
-		players.add(play, 2, 1);
+		players.add(play, 5, 1);
+		
 			
 		
 		//-------------------Select Avatar Pane------------------------------------//
 		
 		GridPane playerPane = new GridPane();
-		playerPane.setPadding(new Insets(10, 10, 10, 10));
-		playerPane.setVgap(10);
-		playerPane.setHgap(10);
+		playerPane.setPadding(new Insets(10, 0, 10, 15));
+		playerPane.setVgap(30);
+		playerPane.setHgap(20);
+		
+		
+		Button louise2Button = new Button();
+		louise2Button.setGraphic(louise2View);
+		louise2Button.setOnAction(e -> {
+			if (player == "player1") {
+				player1URL = louise2URL;
+				player1.setImage(louise2);
+			} //End if statement
+			else if (player == "player2") {
+				player2URL = louise2URL;
+				player2.setImage(louise2);
+			} //End else if statement
+				handlePlayerSelection();
+		}); //End louise2 Button
+		
+		
+		Button tina2Button = new Button();
+		tina2Button.setGraphic(tina2View);
+		tina2Button.setOnAction(e -> {
+			if (player == "player1") {
+				player1URL = tina2URL;
+				player1.setImage(tina2);
+			} //End if statement
+			else if (player == "player2") {
+				player2URL = tina2URL;
+				player2.setImage(tina2);
+			} //End else if statement
+				handlePlayerSelection();
+		}); //End tina2 Button
+		
+		
+		Button geneButton = new Button();
+		geneButton.setGraphic(geneView);
+		geneButton.setOnAction(e -> {
+			if (player == "player1") {
+				player1URL = geneURL;
+				player1.setImage(gene);
+			} //End if statement
+			else if (player == "player2") {
+				player2URL = geneURL;
+				player2.setImage(gene);
+			} //End else if statement
+				handlePlayerSelection();
+		}); //End gene Button
+		
+		
+		Button bob2Button = new Button();
+		bob2Button.setGraphic(bob2View);
+		bob2Button.setOnAction(e -> {
+			if (player == "player1") {
+				player1URL = bob2URL;
+				player1.setImage(bob2);
+			} //End if statement
+			else if (player == "player2") {
+				player2URL = bob2URL;
+				player2.setImage(bob2);
+			} //End else if statement
+				handlePlayerSelection();
+		}); //End bob2 Button
+		
+		
+		Button linda2Button = new Button();
+		linda2Button.setGraphic(linda2View);
+		linda2Button.setOnAction(e -> {
+			if (player == "player1") {
+				player1URL = linda2URL;
+				player1.setImage(linda2);
+			} //End if statement
+			else if (player == "player2") {
+				player2URL = linda2URL;
+				player2.setImage(linda2);
+			} //End else if statement
+				handlePlayerSelection();
+		}); //End linda2 Button
+		
+		
+		Button rickButton = new Button();
+		rickButton.setGraphic(rickView);
+		rickButton.setOnAction(e -> {
+			if (player == "player1") {
+				player1URL = rickURL;
+				player1.setImage(rick);
+			} //End if statement
+			else if (player == "player2") {
+				player2URL = rickURL;
+				player2.setImage(rick);
+			} //End else if statement
+				handlePlayerSelection();
+		}); //End rick Button
+		
+		
+		Button mortieButton = new Button();
+		mortieButton.setGraphic(mortieView);
+		mortieButton.setOnAction(e -> {
+			if (player == "player1") {
+				player1URL = mortieURL;
+				player1.setImage(mortie);
+			} //End if statement
+			else if (player == "player2") {
+				player2URL = mortieURL;
+				player2.setImage(mortie);
+			} //End else if statement
+				handlePlayerSelection();
+		}); //End mortie Button
+		
 		
 		Button unicornButton = new Button();
 		unicornButton.setGraphic(unicornView);
@@ -212,24 +379,86 @@ public class ConnectFour extends Application {
 		}); //End hello Kitty Button
 		
 		
-		playerPane.add(unicornButton, 0, 0);
-		playerPane.add(pikaButton, 1, 0);
-		playerPane.add(dogoButton, 0, 1);
-		playerPane.add(raccoonButton, 1, 1);
+		Button pandaButton = new Button();
+		pandaButton.setGraphic(pandaView);
+		pandaButton.setOnAction(e -> {
+			if (player == "player1") {
+				player1URL = pandaURL;
+				player1.setImage(panda);
+			} //End if statement
+			else if (player == "player2") {
+				player2URL = pandaURL;
+				player2.setImage(panda);
+			} //End else if statement
+				handlePlayerSelection();
+		}); //End panda Button
+		
+		
+		Button catButton = new Button();
+		catButton.setGraphic(catView);
+		catButton.setOnAction(e -> {
+			if (player == "player1") {
+				player1URL = catURL;
+				player1.setImage(cat);
+			} //End if statement
+			else if (player == "player2") {
+				player2URL = catURL;
+				player2.setImage(cat);
+			} //End else if statement
+				handlePlayerSelection();
+		}); //End cat Button
+		
+		
+		Button minionButton = new Button();
+		minionButton.setGraphic(minionView);
+		minionButton.setOnAction(e -> {
+			if (player == "player1") {
+				player1URL = minionURL;
+				player1.setImage(minion);
+			} //End if statement
+			else if (player == "player2") {
+				player2URL = minionURL;
+				player2.setImage(minion);
+			} //End else if statement
+				handlePlayerSelection();
+		}); //End minion Button
+		
+		
+		
+		playerPane.add(louise2Button, 0, 0);
+		playerPane.add(tina2Button, 1, 0);
+		playerPane.setHalignment(tina2Button, HPos.CENTER); 
+		playerPane.setValignment(tina2Button, VPos.CENTER);
+		playerPane.add(geneButton, 2, 0);
+		playerPane.add(bob2Button, 3, 0);
+		playerPane.setHalignment(bob2Button, HPos.CENTER); 
+		playerPane.setValignment(bob2Button, VPos.CENTER);
+		playerPane.add(linda2Button, 4, 0);
+		playerPane.add(rickButton, 0, 1);
+		playerPane.setHalignment(rickButton, HPos.CENTER); 
+		playerPane.setValignment(rickButton, VPos.CENTER);
+		playerPane.add(mortieButton, 1, 1);
+		playerPane.add(pikaButton, 2, 1);
+		playerPane.add(minionButton, 3, 1);
+		playerPane.add(unicornButton, 4, 1);
 		playerPane.add(helloKittyButton, 0, 2);
+		playerPane.add(catButton, 1, 2);
+		playerPane.add(pandaButton, 2, 2);
+		playerPane.add(dogoButton, 3, 2);
+		playerPane.add(raccoonButton, 4, 2);
 
 
 		
 	
 		BorderPane borderPane = new BorderPane();
-		borderPane.setTop(selectPlayer);
+		borderPane.setTop(selectPlayerBanner);
 		borderPane.setCenter(playerPane);
 		borderPane.setBottom(players);
 		
 		Scene scene = new Scene(borderPane, 700, 800);
-		primaryStage.setTitle("Connect Four");
-		primaryStage.setScene(scene);
-		primaryStage.show();
+		stage.setTitle("Connect Four");
+		stage.setScene(scene);
+		stage.show();
 	} //End start
 	
 	
@@ -242,22 +471,42 @@ public class ConnectFour extends Application {
     	if (player == "player1") {
     		playerSelectionText.setText("Player 2 choose your avatar!");
     		player = "player2";
-    	}
+    	} //End if statement
     	else if (player == "player2") {
     		playerSelectionText.setText("Player 1 choose your avatar!");
     		player = "player1";
-    	}
+    		enablePlay();
+    	} //End else if statement
 	} //End handle player selection
 	
+	public void enablePlay() {
+
+		play.setDisable(false);
+
+		play.setOnAction(new EventHandler<ActionEvent>() {
+			
+
+			
+		//----------------------Game---------------------------------//
+	        @Override
+	        public void handle(ActionEvent event) {
+  	
+	        	Game game = new Game();
+	        	game.nextMove();
+	        } //End handle event
+		}); //End set on action
 	
+	} //End enable play button
 
 //----------------------Class Game---------------------------------//
 		
 	public class Game extends Cell {
 		
+		BorderPane game = new BorderPane();
+		StackPane winnerPane = new StackPane();
 		
 		public Game() {
-			VBox playersMove = new VBox();
+			
 			StackPane banner = new StackPane();
 			banner.setAlignment(Pos.CENTER);
 			
@@ -270,11 +519,9 @@ public class ConnectFour extends Application {
 			
 			banner.getChildren().addAll(bannerRectangle, bannerText);
 			
-			Pane move = new Pane();
+			
 			
 			avatar.setImage(new Image(player1URL, 100, 100, true, true));
-			avatar.setCache(true);
-			avatar.setCacheHint(CacheHint.SPEED);
 			move.getChildren().add(avatar);
 			
 			playersMove.getChildren().addAll(banner, move);
@@ -283,10 +530,10 @@ public class ConnectFour extends Application {
 				for (int j = 0; j < 6; j++)
 					pane.add(cell[i][j] = new Cell(), i, j);
 			
+			winnerPane.getChildren().add(pane);
 			
-	        BorderPane game = new BorderPane();
 	        game.setTop(playersMove);
-	        game.setCenter(pane);
+	        game.setCenter(winnerPane);
 	
 	        Scene gameScene = new Scene(game, 700, 800);
 	        Stage newWindow = new Stage();
@@ -413,73 +660,202 @@ public class ConnectFour extends Application {
 			if (player == "player1") {		
 				cell[i][j].setToken(1);
 				ImageView avatar1 = new ImageView(new Image(player1URL, 100, 100, true, true));
-				avatar1.setCache(true);
-				avatar1.setCacheHint(CacheHint.SPEED);
 				pane.add(avatar1, i, j);
 			} //End if statements
 			
 			else if (player == "player2") {	
 				cell[i][j].setToken(2);
 				ImageView avatar2 = new ImageView(new Image(player2URL, 100, 100, true, true));
-				avatar2.setCache(true);
-				avatar2.setCacheHint(CacheHint.SPEED);
 				pane.add(avatar2, i, j); 
 			} //End if statements
-			checkResult();		
+			//checkResult(winner);
+			handlePlayerTurn();
 	    } //End setAvatar
 	    
 	    
 	    
 	    //Check for winner
-	    public void checkResult() {
+	    public boolean checkResult(boolean winner) {
 	    	
 	    	//StackPane winnerPane = new StackPane();
 	    	
-	    	//Check vertical rows for winner
+	    	//Check horizontal rows for winner
 	    	for (int j = 0; j < 6; j++)
 	    		for (int i = 0; i < 4; i++) {
 	    			if (cell[i][j].getToken() == 1 &&
 	    					cell[i + 1][j].getToken() == 1 &&
 	    					cell[i + 2][j].getToken() == 1 &&
 	    					cell[i + 3][j].getToken() == 1) {
-	    				avatar.setFitHeight(500);
-    					avatar.setPreserveRatio(true);
-    					avatar.setSmooth(true);
-    					avatar.setCache(true); 
-    					//winnerPane.getChildren().addAll(pane, avatar);
-	    			}
-	    			} //End check vertical
-	    			
-	    	 //Check horizontal
+	    						cell[i][j].setTranslateZ(200);
+	    						cell[i + 1][j].setTranslateZ(200);
+	    						cell[i + 2][j].setTranslateZ(200);
+	    						cell[i + 3][j].setTranslateZ(200);
+	    						setWinner(1);
+	    						return true;
+	    			} //End if winner horizontal 1
+	    			else if (cell[i][j].getToken() == 2 &&
+	    					cell[i + 1][j].getToken() == 2 &&
+	    					cell[i + 2][j].getToken() == 2 &&
+	    					cell[i + 3][j].getToken() == 2) {
+	    						setWinner(2);
+	    						return true;
+	    			} //End if winner horizontal 2	    			
+	    		} //End check vertical
+	    		    	
+	    	
+	    	 //Check vertical
     		for (int i = 0; i < 7; i++) 
 	    		for (int j = 0; j < 3; j++) {
 	    			if (cell[i][j].getToken() == 1 &&
-	    					cell[j + 1][j].getToken() == 1 &&
-	    					cell[j + 2][j].getToken() == 1 &&
-	    					cell[j + 3][j].getToken() == 1) {
-	    				avatar.setFitHeight(500);
-    					avatar.setPreserveRatio(true);
-    					avatar.setSmooth(true);
-    					avatar.setCache(true); 
-    					//winnerPane.getChildren().addAll(pane, avatar);
-	    			}
-	    			} //End check horizontal
-	    		
-	    	handlePlayerTurn();	
+	    					cell[i][j + 1].getToken() == 1 &&
+	    					cell[i][j + 2].getToken() == 1 &&
+	    					cell[i][j + 3].getToken() == 1) {
+	    						setWinner(1);
+	    						return true;
+	    			} //End if player 1 wins vertically
+	    			else if (cell[i][j].getToken() == 2 &&
+	    					cell[i][j + 1].getToken() == 2 &&
+	    					cell[i][j + 2].getToken() == 2 &&
+	    					cell[i][j + 3].getToken() == 2) {
+	    						setWinner(2);
+	    						return true;
+	    			} //End if player 2 wins vertically
+	    		} //End check vertical
+	    	
+    		
+    		//Check  ascending horizontal 
+    		for (int i = 0; i < 4; i++) 
+    			for (int j = 5; j > 2; j--) {
+    				if (cell[i][j].getToken() == 1 &&
+    						cell[i + 1][j - 1].getToken() == 1 &&
+    						cell[i + 2][j - 2].getToken() == 1 &&
+    						cell[i + 3][j - 3].getToken() == 1) {
+		    					setWinner(1);
+								return true;
+    				} //End if player 1 wins ascending horizontal
+    				else if (cell[i][j].getToken() == 2 &&
+    						cell[i + 1][j - 1].getToken() == 2 &&
+    						cell[i + 2][j - 2].getToken() == 2 &&
+    						cell[i + 3][j - 3].getToken() == 2) {
+		    					setWinner(2);
+								return true;
+    				} //End if player 2 wins ascending horizontal
+    			} //End check ascending horizontal
+    		
+    		
+    		//Check descending horizontal
+    		for (int i = 0; i < 4; i++) 
+    			for (int j = 0; j < 3; j++) {
+    				if (cell[i][j].getToken() == 1 &&
+    						cell[i + 1][j + 1].getToken() == 1 &&
+    						cell[i + 2][j + 2].getToken() == 1 &&
+    						cell[i + 3][j + 3].getToken() == 1) {
+		    					setWinner(1);
+								return true;
+    				} //End if player 1 wins descending horizontal
+    				else if (cell[i][j].getToken() == 2 &&
+    						cell[i + 1][j + 1].getToken() == 2 &&
+    						cell[i + 2][j + 2].getToken() == 2 &&
+    						cell[i + 3][j + 3].getToken() == 2) {
+		    					setWinner(2);
+								return true;
+    				} //End if player 2 wins descending horizontal
+    			} //End check descending horizontal
+	    	return false;		    	
 	    } //End check result
 	    
+	   
 	    
-	    public void handlePlayerTurn() {           	
-	    	player = (player == "player1") ? "player2" : "player1";
+	    //Check if game is a tie
+	    public boolean isTie(boolean winner) {
+	    	for (int i = 0; i < 7; i++) 
+	    		for (int j = 0; j < 6; j++) {
+	    			if (cell[i][j].getToken() == 0) {
+	    				return false;
+	    			} //End if statement
+	    		} //End for statement
+	    	setWinner(3);
+	    	return true;
+	    } //End check if game is a tie
+	    
+	    
+	    
+	    //Set winner
+	    public void setWinner(int winner) { 
+
+	    	DropShadow shadow = new DropShadow();
+	    	shadow.setRadius(50);
 	    	
-	    	if (player == "player1") {
-	    		avatar.setImage(new Image(player1URL, 100, 100, true, true));
-	    		bannerText.setText("Player 1 make your move!");
-	    	} //End if
-	    	else if (player == "player2") {
-	    		avatar.setImage(new Image(player2URL, 100, 100, true, true));
-	    		bannerText.setText("Player 2 make your move!");
-	    	} //End else if
+	    	VBox replay = new VBox();
+	    	ImageView winnerAvatar = new ImageView();
+	    	winnerAvatar.setEffect(shadow);
+	    	
+	    	Button newGame = new Button("PLAY AGAIN");
+	    	newGame.setPrefSize(100, 70);
+	    
+	    	replay.getChildren().add(newGame);
+	    	replay.setAlignment(Pos.CENTER);
+	    	replay.setPadding(new Insets(15, 0, 15, 0));
+	    	
+	    	playersMove.getChildren().remove(move);
+	    	playersMove.getChildren().add(replay);
+	    	
+	    	
+	    	
+			if (winner == 3) { //tie game
+				bannerText.setText("It's a Tie!!!");
+			} //End if game is a tie 
+			else if (winner == 1) {
+	    		bannerText.setText("Player 1 is the WINNER!!!");
+	    		winnerAvatar.setImage(new Image(player1URL, 400, 400, true, true));
+	    	} //End if player 1 is the winner
+	    	else if (winner == 2) {
+	    		bannerText.setText("Player 2 is the WINNER!!!");
+	    		winnerAvatar.setImage(new Image(player2URL, 400, 400, true, true));
+	    	} //End if player 2 is the winner
+			
+
+			winnerPane.getChildren().add(winnerAvatar);
+			
+			
+			//Move winner's avatar
+			winnerAvatar.setOnMouseDragged(e -> {
+				winnerAvatar.setTranslateX(e.getX());   
+				winnerAvatar.setTranslateY(e.getY()); 
+			}); //End set on mouse dragged
+			
+			
+
+			//Play new game
+			newGame.setOnAction(new EventHandler<ActionEvent>() {
+				@Override
+				public void handle(ActionEvent event) {
+
+					NewConnect restartGame = new NewConnect();
+					restartGame.restart(stage);
+				
+				}//End handle event
+			}); //End play new game
+	
+			
+	    } //End set winner
+	    
+	    
+	    
+	    
+	    //Handle player turn
+	    public void handlePlayerTurn() {  
+	    	if (!checkResult(winner) && !isTie(winner)) {
+		    	player = (player == "player1") ? "player2" : "player1";	    	
+		    	if (player == "player1") {
+		    		avatar.setImage(new Image(player1URL, 100, 100, true, true));
+		    		bannerText.setText("Player 1 make your move!");
+		    	} //End if
+		    	else if (player == "player2") {
+		    		avatar.setImage(new Image(player2URL, 100, 100, true, true));
+		    		bannerText.setText("Player 2 make your move!");
+		    	} //End else if 	
+	    	} //End if not winner
 	    } //End handle player turn
 	
 	} //End class Game
